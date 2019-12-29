@@ -146,12 +146,9 @@ To configure this file, use the template found at `templates/.ukbb_paths.py <htt
 and edit the file with your favorite text editor (follow the detailed instructions within the template settings).
 
 
+Cite us
+===============
 
+If you use ukbb_parser in a work contributing to a scientific publication, we ask that you cite our publication: 
 
-
-
-
-
-    
-
-    
+Nadav Brandes, Nathan Linial, Michal Linial, PWAS: Proteome-Wide Association Study, bioRxiv, https://doi.org/10.1101/812289
