@@ -38,6 +38,8 @@ A more elaborate example is available in the `ukbb_parser demo notebook <https:/
 
 ``create_ICD10_dataset`` is a similar function that would provide you with ICD-10 derived phenotypes, on top of the "regular" UKBB fields requested. ICD-10 codes are derived from the following UKBB fields: `main diagnoses (41202) <http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=41202>`_, `secondary diagnoses (41204) <http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=41204>`_, `cancer type (40006) <http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=40006>`_, `primary cause of death (40001) <http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=40001>`_, `secondary cause of death (40002) <http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=40002>`_ and `external causes (41201) <http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=41201>`_. Usage of this function is also exemplified in the same notebook.
 
+ukbb_parser also allows you to access UKBB's genetic data, in the form of either raw genotyped markers or imputed variants. This can be done using the functions ``get_chrom_raw_marker_data`` (which depends on the `pandas_plink module <https://pypi.org/project/pandas-plink/>`_) and ``get_chrom_imputation_data`` (which depends on the `bgen_parser module <https://github.com/nadavbra/bgen_parser/>`_)
+
 The  `ukbb_parser demo notebook <https://github.com/nadavbra/ukbb_parser/blob/master/ukbb_parser%20demo.ipynb>`_ illustrates most of the core functionality of the Python API. In addition, you may consult with the help message of the module's functions.
 
 Command-line API
