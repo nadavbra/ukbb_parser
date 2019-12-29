@@ -135,7 +135,7 @@ Python dependencies
 Configuration
 ===============
 
-Following installtion, you will have to create and configure a ``.ukbb_paths`` file in your home directory (i.e. ``~/.ukbb_paths``). This settings file specifies the paths of all the necessary UKBB data files on your filesystem.
+Following installtion, you will have to create and configure a ``.ukbb_paths.py`` file in your home directory (i.e. ``~/.ukbb_paths.py``). This settings file specifies the paths of all the necessary UKBB data files on your filesystem.
 
 
 
