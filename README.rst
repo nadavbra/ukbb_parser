@@ -6,13 +6,9 @@ ukbb_parser is a Python module for loading phenotypic and genetic data from the 
 Key features:
 
 * Loading any set of UKBB fields into a clean dataframe or CSV file.
-
 * Implementing standard filtrations over the loaded dataset of samples (e.g. restricting ethnicity or avoiding kinship).
-
 * Automatically extracting covariates commonly used in GWAS (sex, age, genetic principal components, batch and assessment canter).
-
 * Extracting and parsing phenotypes derived from ICD-10 codes.
-
 * Loading genetic data in both PLINK BED format (for raw markers) or BGEN format (for imputed variants).
 
 Once configured and provided with the paths of the UKBB files on your filesystem, ukbb_parser will automatically access the raw data files required for each operation.
@@ -51,13 +47,13 @@ If you are not a fan of Python, and just want to use ukbb_parser to extract some
 
 The main command provided by ukbb_parser is ``create_ukbb_phenotype_dataset``. A basic usage of this command goes as follows:
 
-.. code-block:: tcsh
+.. code-block:: cshell
 
     create_ukbb_phenotype_dataset --phenotype-specs-file=/path/to/phenotype_specs.py --output-dataset-file=/path/to/created_ukbb_dataset.csv
     
 As an example, you can use `examples/phenotype_specs.py <https://github.com/nadavbra/ukbb_parser/blob/master/examples/phenotype_specs.py>`_ which specifies 49 prominent phenotypes from various sources:
 
-.. code-block:: tcsh
+.. code-block:: cshell
 
     cd /tmp
     wget https://raw.githubusercontent.com/nadavbra/ukbb_parser/master/examples/phenotype_specs.py
@@ -82,13 +78,11 @@ The main thing to understand about this command is how to specify the requested 
 Each phenotype specification requires two settings:
 
 * **name**: The name of the phenotype (to comprise the name of the column in the output CSV)
-
 * **source**: ``'field'`` if taken directly from a UKBB field, or ``'ICD-10'`` if taken from a set of ICD-10 codes, or ``'aggregation'`` if defined by some aggregation function of other sub-specifications (more details on each of these three options below).
 
 *field* specifications should also provide the following two settings:
 
 * **field_id**: The UKBB field ID (as listed in the `UKBB's showcase Crystal system <http://biobank.ctsu.ox.ac.uk/crystal/>`_).
-
 * **field_type**: The type of the field, which could be either ``'continuous'`` (to be parsed as real-valued continuous numbers, which are to be the maximum of all the samples associated with each sample, in case of multiple versions/entries of the field), or ``'binary'`` (to be parsed as 0 or 1), or ``'set'`` (to provide all the values associated with each sample), or ``'function'`` (to provide any Python function to parse the raw values of the field). More details about these options is available in the documentation ukbb_parser.create_dataset. 
 
 *ICD-10* specifications should also provide a **codings** setting, that should contain a list of ICD-10 codings to be considered as part of this phenotype (this will result a binary phenotype with positive (1) values corresponding to each sample that has at least one of the listed ICD-10 codes).
@@ -101,15 +95,49 @@ If you want to extract a dataset to work on using the ``create_ukbb_phenotype_da
 
 ukbb_parser also provides a ``create_ukbb_genotype_spec_file`` command, that lists all the genotyping files provided by the UKBB. For example:
 
-.. code-block:: tcsh
+.. code-block:: cshell
 
     create_ukbb_genotype_spec_file --genotyping-type=raw --output-file=/tmp/ukbb_raw_marker_genotyping_spec.csv
     
 Or:
 
-.. code-block:: tcsh
+.. code-block:: cshell
 
     create_ukbb_genotype_spec_file --genotyping-type=imputation --output-file=/tmp/ukbb_imputation_genotyping_spec.csv
+    
+
+Installation
+===============
+
+Just run:
+
+.. code-block:: cshell
+
+    git clone https://github.com/nadavbra/ukbb_parser.git /tmp/ukbb_parser_src
+    cd /tmp/ukbb_parser_src
+    git submodule update --init --recursive
+    python setup.py install
+
+
+Python dependencies
+-----------------
+
+(requires Python 3)
+
+* numpy
+* scipy
+* pandas
+* matplotlib
+* biopython
+* statsmodels
+
+
+Configuration
+===============
+
+Following installtion, you will have to create and configure a ``.ukbb_paths`` file your home directory (i.e. ``~/.ukbb_paths``). This settings file specifies the paths of all the necessary UKBB data files on your filesystem.
+
+
 
 
 
