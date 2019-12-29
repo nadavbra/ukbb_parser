@@ -1,0 +1,66 @@
+#! /usr/bin/env python3
+
+import os
+import argparse
+
+import pandas as pd
+
+from ukbb_parser.shared_utils.util import get_parser_file_type
+from ukbb_parser import ukbb_paths
+
+def get_raw_marker_genotyping_chrom_spec(chrom):
+    return {
+        'name': chrom,
+        'description': 'raw markers of chr%s (PLINK BED format)' % chrom,
+        'format': 'plink',
+        'bed_file_path': os.path.join(ukbb_paths.CALL_DIR, 'ukb_cal_chr%s_v2.bed' % chrom),
+        'bim_file_path': os.path.join(ukbb_paths.CALL_DIR, 'ukb_snp_chr%s_v2.bim' % chrom),
+        'fam_file_path': ukbb_paths.FAM_FILE_PATH,
+    }
+    
+def get_imputation_genotyping_chrom_spec(chrom):
+    return {
+        'name': chrom,
+        'description': 'imputed variants of chr%s (BGEN format)' % chrom,
+        'format': 'bgen',
+        'bgen_file_path': os.path.join(ukbb_paths.IMPUTATION_V3_DIR, 'ukb_imp_chr%s_v3.bgen' % chrom),
+        'bgi_file_path': os.path.join(ukbb_paths.IMPUTATION_V3_DIR, 'ukb_imp_chr%s_v3.bgen.bgi' % chrom),
+        'sample_file_path': os.path.join(ukbb_paths.IMPUTATION_V3_DIR, ukbb_paths.IMPUTATION_V3_SAMPLE_FILE_NAME_TEMPLATE % chrom),
+    }
+    
+def validate_file_paths_in_spec(spec, missing_file_action):
+    for key, value in spec.items():
+        if key.endswith('file_path'):
+            if not os.path.isfile(value):
+                if missing_file_action == 'error':
+                    raise Exception('File does not exist: %s' % value)
+                elif missing_file_action == 'warning':
+                    print('Warning: file does not exist: %s' % value)
+
+GENOTYPING_TYPES = {
+    # genotyping_type: (chroms, get_chrom_genotyping_spec_function)
+    'raw': (list(map(str, range(1, 23))) + ['X', 'Y', 'XY', 'MT'], get_raw_marker_genotyping_chrom_spec),
+    'imputation': (list(map(str, range(1, 23))) + ['X', 'XY'], get_imputation_genotyping_chrom_spec),
+}
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description = 'Create a specification CSV file listing the genotyping data files (one per chromosome) provided by ' + \
+            'the UK Biobank (of either the raw markers or the imputed variants).')
+    parser.add_argument('--genotyping-type', dest = 'genotyping_type', choices = ['raw', 'imputation'], required = True, help = 'The type of genotyping ' + \
+            'data to create the specification file for (either raw markers in PLINK BED format, or imputed variants in BGEN format).')
+    parser.add_argument('--output-file', dest = 'output_file', metavar = '/path/to/ukbb_genetyping_spec.csv', type = get_parser_file_type(parser), \
+            required = True, help = 'Path to the output CSV file.')
+    parser.add_argument('--missing-file-action', dest = 'missing_file_action', choices = ['error', 'warning', 'ignore'], default = 'warning', \
+            help = 'The action to be taken if one of the genotyping files is missing (default: warning).')
+    args = parser.parse_args()
+    
+    chroms, get_chrom_genotyping_spec_function = GENOTYPING_TYPES[args.genotyping_type]
+    specs = []
+    
+    for chrom in chroms:
+        spec = get_chrom_genotyping_spec_function(chrom)
+        validate_file_paths_in_spec(spec, args.missing_file_action)
+        specs.append(spec)
+        
+    pd.DataFrame(specs).to_csv(args.output_file, index = False)

@@ -1,0 +1,90 @@
+#! /usr/bin/env python3
+
+import json
+import argparse
+
+import pandas as pd
+
+from ukbb_parser.shared_utils.util import log, start_log, get_parser_bool_type, get_parser_file_type, get_parser_directory_type
+from ukbb_parser import create_phenotype_dataset
+
+LOG_FILE_BASE_NAME = 'ukbb_phenotype_dataset_creation'
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description = 'Create a dataset of phenotypes (and covariates) from the UK Biobank according to a list ' + \
+            'of phenotype specifications.')
+    parser.add_argument('--phenotype-specs-file', dest = 'phenotype_specs_file', metavar = '/path/to/phenotype_specs.py', \
+            type = get_parser_file_type(parser, must_exist = True), required = True, help = 'Path to a .py file with the phenotype specifications for ' + \
+            'the dataset. The specified Python file should define a \'specs\' variable, which should be a list of dictionries, each specifying a different ' + \
+            'phenotype to be parsed. See examples/phenotype_specs.py as an example, or refer to the documentation of the function create_phenotype_dataset ' + \
+            'for more details.')
+    parser.add_argument('--output-dataset-file', dest = 'output_dataset_file', metavar = '/path/to/dataset.csv', type = get_parser_file_type(parser), \
+            required = True, help = 'Path to the output CSV file for the dataset to be created, which should contain a row per sample, with eid, ' + \
+            'phenotypes and covariate columns.')
+    parser.add_argument('--output-phenotype-columns-file', dest = 'output_phenotype_columns_file', metavar = '/path/to/phenotype_columns.json',
+            type = get_parser_file_type(parser), default = None, help = 'If provided, will write the names of all the parsed phenotype columns into this ' + \
+            'file path (using JSON format).')
+    parser.add_argument('--output-covariates-columns-file', dest = 'output_covariate_columns_file', metavar = '/path/to/covariate_columns.json',
+            type = get_parser_file_type(parser), default = None, help = 'If provided, will write the names of all the parsed covariate columns into this ' + \
+            'file path (using JSON format).')
+    parser.add_argument('--nrows', dest = 'nrows', metavar = '<nrows>', type = int, default = None, help = 'An upper limit to the number of read samples ' + \
+            '(by default will read all rows).')
+    parser.add_argument('--only-caucasians', dest = 'only_caucasians', metavar = 'false', type = get_parser_bool_type(parser), default = True, \
+            help = 'Whether to filter out non-Caucasian samples (true by default).')
+    parser.add_argument('--no-kinship', dest = 'no_kinship', metavar = 'false', type = get_parser_bool_type(parser), default = True, \
+            help = 'Whether to filter out related individuals, leaving only one sample from each kinship group (true by default). See the documentation ' + \
+            'of the function remove_kinships for more details.')
+    parser.add_argument('--use-genotyping-metadata-for-covariates', dest = 'use_genotyping_metadata_for_covariates', metavar = 'false', \
+            type = get_parser_bool_type(parser), default = True, help = 'Whether to use genotyping metadata for additional covariates (40 PCs and batch) ' + \
+            'and to further filter samples lacking genotyping data or with mismatching genetic vs. self-reported sex (true by default). Note that ' + \
+            '--include-batch is ignored when this is set to false.')
+    parser.add_argument('--include-const', dest = 'include_const', metavar = 'false', type = get_parser_bool_type(parser), default = True, \
+            help = 'Whether to include the constant (1) in the covariates (true by default).')
+    parser.add_argument('--include-assessment-center-covariates', dest = 'include_assessment_center_covariates', metavar = 'false', \
+            type = get_parser_bool_type(parser), default = True, help = 'Whether to include the assessment centers in the covariates, using ' + \
+            'one-hot-encoding (true by default).')
+    parser.add_argument('--include-batch-covariates', dest = 'include_batch_covariates', metavar = 'false', type = get_parser_bool_type(parser), \
+            default = True, help = 'Whether to include the batch in the covariates, using one-hot-encoding (true by default). This parameter is ignored ' + \
+            'when --use-genotyping-metadata-for-covariates is set to false.')
+    parser.add_argument('--ignore-samples-without-any-ICD10', dest = 'ignore_samples_without_any_ICD10', metavar = 'false', \
+            type = get_parser_bool_type(parser), default = True, help = 'If true (which is the default), all phenotypes defined by ICD-10 codes will be ' + \
+            'parsed as blank values for samples that don\'t have any ICD-10 codes associated with them.')
+    parser.add_argument('--verbose', dest = 'verbose', metavar = 'false', type = get_parser_bool_type(parser), default = True, help = 'Whether to log ' + \
+            'details of the operation of this process.')
+    parser.add_argument('--log-dir', dest = 'log_dir', metavar = '/path/to/log/dir/', type = get_parser_directory_type(parser), default = '.', \
+            help = 'The directory in which to create the log file (only if --verbose=true, which is the default). Default is the current working directory.')
+    args = parser.parse_args()
+    
+    if args.verbose:
+        start_log(args.log_dir, LOG_FILE_BASE_NAME)
+        log('Parsing the phenotype specifications...')
+    
+    with open(args.phenotype_specs_file, 'r') as f:
+        context = {}
+        exec(f.read(), context)
+        full_phenotype_specs = context['specs']
+    
+    parse_dataset_covariates_kwargs = dict(use_genotyping_metadata = args.use_genotyping_metadata_for_covariates, include_const = args.include_const, \
+            include_assessment_centers = args.include_assessment_center_covariates, include_batch = args.include_batch_covariates)
+    eid, phenotype_values, covariates = create_phenotype_dataset(full_phenotype_specs, nrows = args.nrows, only_caucasians = args.only_caucasians, \
+            no_kinship = args.no_kinship, parse_dataset_covariates_kwargs = parse_dataset_covariates_kwargs, \
+            ignore_samples_without_any_ICD10 = args.ignore_samples_without_any_ICD10, verbose = args.verbose)
+    dataset = pd.concat([eid, phenotype_values, covariates], axis = 1)
+    dataset.index.rename('sample_index', inplace = True)
+    
+    if args.verbose:
+        log('Writing the final dataset (%dx%d)...' % dataset.shape)
+    
+    dataset.to_csv(args.output_dataset_file)
+    
+    if args.output_phenotype_columns_file is not None:
+        with open(args.output_phenotype_columns_file, 'w') as f:
+            json.dump(phenotype_values.columns.tolist(), f)
+            
+    if args.output_covariate_columns_file is not None:
+        with open(args.output_covariate_columns_file, 'w') as f:
+            json.dump(covariates.columns.tolist(), f)
+        
+    if args.verbose:
+        log('Done.')
