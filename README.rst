@@ -137,6 +137,15 @@ Configuration
 
 Following installtion, you will have to create and configure a ``.ukbb_paths.py`` file in your home directory (i.e. ``~/.ukbb_paths.py``). This settings file specifies the paths of all the necessary UKBB data files on your filesystem.
 
+To configure this file, use the template found at `templates/.ukbb_paths.py <https://github.com/nadavbra/ukbb_parser/blob/master/templates/.ukbb_paths.py>`_, i.e. run:
+
+.. code-block:: cshell
+
+    wget https://raw.githubusercontent.com/nadavbra/ukbb_parser/master/templates/.ukbb_paths.py -O ~/.ukbb_paths.py
+    
+and edit the file with your favorite text editor (follow the detailed instructions within the template settings).
+
+
 
 
 
