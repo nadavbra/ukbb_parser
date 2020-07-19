@@ -151,6 +151,4 @@ and edit the file with your favorite text editor (follow the detailed instructio
 Cite us
 ===============
 
-If you use ukbb_parser in a work contributing to a scientific publication, we ask that you cite our publication: 
-
-Nadav Brandes, Nathan Linial, Michal Linial, PWAS: Proteome-Wide Association Study, bioRxiv, https://doi.org/10.1101/812289
+If you use ukbb_parser in a work contributing to a scientific publication, we ask that you cite our paper: Brandes, N., Linial, N. & Linial, M. PWAS: proteome-wide association study—linking genes and phenotypes by functional variation in proteins. Genome Biol 21, 173 (2020). https://doi.org/10.1186/s13059-020-02089-x
