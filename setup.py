@@ -6,7 +6,7 @@ def readme():
 
 setup(
     name = 'ukbb_parser',
-    version = '1.0.0',
+    version = '1.0.1',
     description = 'A Python module for loading phenotypic and genetic data from the UK Biobank.',
     long_description = readme(),
     url = 'https://github.com/nadavbra/ukbb_parser',

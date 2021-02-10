@@ -15,6 +15,7 @@ GENETICS_DIR = os.path.join(BASE_DIR, 'genetics')
 # available for Basket [...]" (or something along those lines). In this email, you should receive an access key, and detailed instructions how to download
 # your approved data. At the end of the process, you should have generated the file ukb<application_id>.csv, whose path should be set here.
 PHENOTYPE_DATASET_CSV_FILE_PATH = os.path.join(BASE_DIR, 'ukb12345.csv')
+PHENOTYPE_DATASET_CSV_FILE_ENCODING = 'latin-1'
 
 # Every once in a while, the UKBB should send you an email titled "UK Biobank Application [...], Participant Withdrawal Notification [...]" (or something
 # along those lines). In this email they attach a CSV file with the sample IDs (eid) of UKBB participants who have requested to withdraw from the dataset.

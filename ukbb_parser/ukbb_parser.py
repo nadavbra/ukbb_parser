@@ -337,7 +337,7 @@ def read_raw_dataset(field_ids, nrows = None, verbose = True):
     covariate_field_ids = set(list(zip(*COVARIATE_FIELDS))[1])
     all_field_ids = covariate_field_ids | set(field_ids)
 
-    headers = pd.read_csv(ukbb_paths.PHENOTYPE_DATASET_CSV_FILE_PATH, nrows = 1).columns
+    headers = pd.read_csv(ukbb_paths.PHENOTYPE_DATASET_CSV_FILE_PATH, encoding = ukbb_paths.PHENOTYPE_DATASET_CSV_FILE_ENCODING, nrows = 1).columns
     relevant_headers = [i for i, header in enumerate(headers) if header == 'eid' or \
             any([header.startswith('%d-' % field_id) for field_id in all_field_ids])]
     ICD10_dtypes = {i: str for i in relevant_headers if any(headers[i].startswith('%d-' % field_id) for _, field_id, _ in ICD10_FIELDS)}
@@ -345,7 +345,8 @@ def read_raw_dataset(field_ids, nrows = None, verbose = True):
     with create_time_measure_if_verbose('Reading %s dataset rows of %d columns (for %d fields)...' % ('all' if nrows is None else nrows, \
             len(relevant_headers), len(all_field_ids)), verbose):
         
-        return pd.read_csv(ukbb_paths.PHENOTYPE_DATASET_CSV_FILE_PATH, usecols = relevant_headers, nrows = nrows, dtype = ICD10_dtypes)
+        return pd.read_csv(ukbb_paths.PHENOTYPE_DATASET_CSV_FILE_PATH, encoding = ukbb_paths.PHENOTYPE_DATASET_CSV_FILE_ENCODING, usecols = relevant_headers, \
+                nrows = nrows, dtype = ICD10_dtypes)
 
 def parse_dataset_covariates(raw_dataset, use_genotyping_metadata = True, include_const = True, include_assessment_centers = True, \
         include_batch = True, verbose = True):
