@@ -628,7 +628,7 @@ def _parse_genotyping_metadata_for_covariates(eid, sex, verbose):
         log('Filtering out %d samples with mismatching genetic and self-reported sex.' % (~sex_mask).sum())
     
     genotyping_metadata = genotyping_metadata[sex_mask]
-    mask[~sex_mask] = False
+    mask[mask][~sex_mask] = False
     return genotyping_metadata, mask
     
 def _get_sample_genotyping_metadata_headers():
